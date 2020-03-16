@@ -1,0 +1,8 @@
+Build Phases :
+	1. Host a static website
+	2. Manage Users
+	3. Build a serverless backend
+	4. Deploy a RESTful API
+	5. Terminate Resources
+
+
