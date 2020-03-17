@@ -1,0 +1,79 @@
+Introduction :
+	- Configure S3 to host static resources for web application.
+	- All the static web content including HTML,CSS,JS,images and other files will be stored in S3.
+	- End user will access site using public URL exposed by Amazon S3.
+	- No web server needed in order to make website available.
+	- Endpoint URL : http://{your-bucket-name}.s3-website.{region}.amazonaws.com
+	- For real application it is recommended to use a custom domain to host the site.
+	- For custome domain tutorial : Setting up a static website using a custom domain in the Amazon S3 documentation.
+
+Implementation Instruction :
+
+Console Step-by-step:
+
+1. Select a Region: US East (N. Virginia)
+2. Create an S3 bucket:
+	- Use the console / AWS CLI to create an S3 bucket
+	- name the bucket as "wildrydes-firstname-lastname"
+	- Create the bucket
+3. Upload Content :
+	- Download the file from the link
+	- Unzip the archived file
+	- Select the bucket
+	- Ensure you are viewing the overview tab
+	- Browse to WebApplication/1_StaticWebHosting/website directory
+	- select all the files and subfolders under the directory
+	- Drag and drop the files into the overview tab of S3
+	- Click on upload
+
+CLI step-by-step :
+
+1. Copy the necesary file from s3://wildrydes-us-east-1/WebApplication/1_StaticWebHosting/website to S3 bucket
+	- aws s3 sync s3://wildrydes-us-east-1/WebApplication/1_StaticWebHosting/website s3://YOUR_BUCKET_NAME --region YOUR_BUCKET_REGION
+
+4. Add a bucket policy to allow public reads :
+	- Bucket policies are JSON document that specify what priniciples are allowed to execute various actions against the objects in your bucket.
+	- In this policy we will allow anonymous users view our site.
+	- By default, the bucket is only accessible by authenticated users with access to our AWS account.
+	- Select the bucket, choose the permission tab, then select the bucket policy.
+	- In the permission tab : 
+	- Make sure public access setting is selected
+	- Click on edit and uncheck "Block new public bucket policies" and "Block public and cross-account access if bucket has public access.
+	- Choose bucket policy:
+	- Enter the following policy replacing [YOUR_BUCKET_NAME] with the name of the bucket
+
+{
+	"version": "2012-10-17",
+	"Statement":[
+		{
+			"Effect": "Allow",
+			"Principal": "*",
+			"Action": "s3.GetObject",
+			"Resource": "arn:aws:s3:::[YOUR_BUCKET_NAME]/*"
+		}
+	]
+}
+
+	- Choose save and apply new policy.
+
+
+5. Enable Website Hosting :
+	- In order to serve asets from the root URL (/index.html), we need to enabe hosting on the bucket
+	- S3 -> Propertires tab -> Static website hosting -> Use this bucket to host a website -> enter index.html
+	- leave the error document blank
+	- Note the endpoint URL at the top of the dialog before choosing save. This URL is the base-url
+	- Save
+
+6. Validate hosting :
+	- Paste the website endpoint URL for S3 bucket
+	- Static web hosting -> properties -> find the base-url
+	- If the page show properly -> move to the next section "User Management". 
+
+
+	
+
+
+
+
+
+
