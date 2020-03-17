@@ -43,7 +43,7 @@ CLI step-by-step :
 	- Enter the following policy replacing [YOUR_BUCKET_NAME] with the name of the bucket
 
 {
-	"version": "2012-10-17",
+	"Version": "2012-10-17",
 	"Statement":[
 		{
 			"Effect": "Allow",
