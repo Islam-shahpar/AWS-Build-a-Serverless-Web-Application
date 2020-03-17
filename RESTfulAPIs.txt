@@ -1,0 +1,105 @@
+Introduction :
+	- Amazon API Gateway will expose the Lambda function as a RESTful API.
+	- This API will be accessible on the public internet.
+	- It will be secured using Amazon Cognito er pool.
+	- This configuration will turn statically hosted website into dynamic web application
+	- By adding client-side JS that makes AJAX calls to expose the API.
+	- To find out how the browser code works that calls API, we need to inspect ride.js
+	- (In this case the application uses jQuery's AJAX method to make remote request.
+
+Implementation step-by-step :
+
+1. Create a New REST API :
+	- Services -> API Gateway -> Create API
+	- New API -> API Name : WildRydes 
+	- Endpoint Type : Edge optimized 
+	(Edge Optimized are the best for public services being accessed from the internet)
+	(Regional endpoints are typically used for APIs that accessed primarily from within the same AWS Region)
+	- Choose create API
+
+2. Create a Cognito User Pools Authorizer :
+	- Amazon API Gateway can use the JWT tokens returned by Cognito User Pools to authenticate API Calls.
+	- In this step we are going to configure an authorizer for our API to use the user pool we created in module 2.
+	- Newly created API -> Authorizers -> Create New Authorizer
+	- Authorizer name : WildRydes -> Type : Cognito
+	- Region drop down under cognito user pool -> us-east-1
+	- Cognito User Pool -> WildRydes
+	- Token Source -> Authorization
+	- Create
+	# Verify authorizer configuration :
+	- open a new browser tab and visit /ride.html under website domain
+	- sign in if required
+	- copy the auth token from the notification on the /ride.html
+	- go back to previous tab where we just finished creating the authorizer
+	- Bottom at the authorizer -> Test
+	- Paste the auth token into the Authorization Token field in the popup dialog.
+	- Click test button and verify that the response code is 200 
+
+3. Create a new resource and method :
+	- Create a new resource called /ride in your API	
+	- Then create a post method for that resource and configure it to use a Lambda proxy integration backend
+	- by the RequestUnicorn function we created in the first step of this module.
+	- Left nav -> Resources under WildRydes API.
+	- Actions -> Create Resource -> Resource Name : ride -> Resource Path : ride
+	- Enable API Gateway CORS for the resource
+	- Create Resource
+	- With the newly created /ride resource selected, from the Action dropdown select Create Method.
+	- Select POST from the new dropdown that appears, then click the checkmark.
+	- Select Lambda Function for the integration type.
+	- Check the box for Use Lambda Proxy integration.
+	- Select the Region you are using for Lambda Region.
+	- Enter the name of the function you created in the previous module, RequestUnicorn, for Lambda Function.
+	- Choose Save. Please note, if you get an error that you function does not exist, check that the region you selected matches the one you used in the previous module.
+	- When prompted to give Amazon API Gateway permission to invoke your function, choose OK.
+	- Choose on the Method Request card.
+	- Choose the pencil icon next to Authorization.
+	- Select the WildRydes Cognito user pool authorizer from the drop-down list, and click the checkmark icon.
+
+4. Deploy the API :
+	- In the Actions drop-down list select Deploy API.
+	- Select [New Stage] in the Deployment stage drop-down list.
+	- Enter prod for the Stage Name.
+	- Choose Deploy.
+	- Note the Invoke URL. You will use it in the next section.
+
+
+5. Update the website config :
+	- Open the config.js file in a text editor.
+	- Update the invokeUrl setting under the api key in the config.js file. Set the value to the Invoke URL for the deployment stage your created in the previous section.
+	- An example of a complete config.js file is included below. Note, the actual values in your file will be different.
+
+window._config = {
+
+    cognito: {
+
+        userPoolId: 'us-west-2_uXboG5pAb', // e.g. us-east-2_uXboG5pAb         
+
+        userPoolClientId: '25ddkmj4v6hfsfvruhpfi7n4hv', // e.g. 25ddkmj4v6hfsfvruhpfi7n4hv
+
+        region: 'us-west-2' // e.g. us-east-2 
+
+    }, 
+
+    api: { 
+
+        invokeUrl: 'https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod' // e.g. https://rc7nyt4tql.execute-api.us-west-2.amazonaws.com/prod, 
+
+    } 
+
+};
+
+	- Save your changes locally.
+	- In the AWS Management Console, choose Services then select S3 under Storage.	
+	- Navigate to the website bucket and then browse to the js key prefix.
+	- Choose Upload.
+	- Choose Add files, select the local copy of config.js and then click Next.
+	- Choose Next without changing any defaults through the Set permissions and Set properties sections.
+	- Choose Upload on the Review section.
+
+
+5. Validate implementation
+	- Visit /ride.html under your website domain.
+	- If you are redirected to the sign in page, sign in with the user you created in the previous module.
+	- After the map has loaded, click anywhere on the map to set a pickup location.
+	- Choose Request Unicorn. You should see a notification in the right sidebar 
+	- that a unicorn is on its way and then see a unicorn icon fly to your pickup location.
