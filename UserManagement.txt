@@ -1,0 +1,83 @@
+Introduction :
+	- Create an Amazon Cognito user pool to manage user's accounts.
+	- Deploy pages that enable customers
+		- to register as a new user
+			- Require an email and password (additional options can be added)
+		- verify the email address
+			- Cognito will send a confirmation email with verification code
+		- sign into the site
+			- Providing email and password 
+			- A JS function communicates with Amazon Cognito, authenticates Secure Remote Password Protocol (SRP)
+			- Receives back a set of JSON Web Token (JWT)
+
+Implementation Instruction :
+
+1. Create a amazon cognito user pool :
+	- Services -> Cognito -> Manage your User Pools -> Create a User Pool
+	- Provide a name for the user pool : "WildRydes" -> Select Review Defaults
+	- On the review page -> Create pool
+	- Note the Pool Id on the pool details page of newly created user pool
+
+2. Add an app to the user pool :
+	- Pool Details page -> General Settings -> App Client
+	- Add an app client -> name the app "WildRydesWebApp"
+	- Uncheck "Generate Client Secret Option" (This is currently not supported for browser-based app)
+	- Choose "Create App client"
+	- Note the "App Clinet ID" for the newly created application
+
+3. Update the /js/config.js in Website bucket
+	- update the newly created user pool ID, app client ID, Region
+	- Download the config.js file from the bucket
+	- Update the cognito section with the correct value:
+		- userPoolId
+		- userPoolClientId	
+		- region: us-east-1
+	- updated config file should look like below;
+
+window._config = {
+	cognito: {
+		userPoolId: 'us-east-1_uXboG5pAb',
+		userPoolClientId: '25ddkmj4v6hfsfvruhpfi7n4hv',
+		region: 'us-east-1'
+	},
+	api: {
+		invokeUrl: ''// e.g. https://rc7nyt4tql.execute-api.us-east-2.amazonaws.com/prod',
+	}
+};
+
+	- save the file a config.js
+ 	- open S3 console
+	- select wildryde website bucket
+	- browse to js prefix
+	- upload -> add files
+	- select config.js and upload
+
+4. Verify Implementation:
+	- Visit /register.html by clicking on "Giddy Up"
+	- Sign up using real/fake email address 
+	- Password should contains at least 1 uppercase letter, 1 number, 1 special character
+	- Confirm new user:
+	- for real email address -> go to /verify.html -> enter the verification code
+		(For real deployment use SES to send email to clients)
+	- for fake email address go through aws console
+	- go to cognito -> Manage your User Pools -> WildRydes user pool -> Left navigation bar -> Users and Groups
+	- choose the corresponding email username and click to see the detail
+	- Choose confirm user to finalize the action
+	- /verify.html or /signin.html try signing in
+	- If successful, should be redirected to /ride.html
+	- You should see notification that API is not configured
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
