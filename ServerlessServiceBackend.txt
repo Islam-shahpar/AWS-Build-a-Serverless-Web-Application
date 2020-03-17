@@ -1,0 +1,98 @@
+Introduction :
+	- Config AWS Lambda and AWS DynamoDB to build a backend process for handling requests for web application
+	- To request that a unicorn be sent to a location of user's choice
+	- JS running in the browser will need to invoke a service running in the cloud.
+	- Implement a lambda function that will be invoked each time a user requests a unicorn.
+		- The function will request a unicorn from the fleet
+		- record the request in DynamDB table
+		- Then respond to the front end with details about the unicorn being dispatched.
+	- The function is invoked from the browser using Amazon API Gateway.
+
+Implementation step-by-step :
+
+1. Create an Amazon DynamoDB table :
+	- DynamoDB Console -> create a new table -> call the table "Rides"
+	- Give the partition key called "RideId" -> Type "String"
+	- (Table name and partition keys are case sensitive)
+	- We have to make sure that we are using the exact ID provided
+	- use the defaults for all other settings
+	- Note the ARN
+
+2. Create an IAM role for the lambda function :
+	- We need to create an IAM role that grants the lambda function to :
+		- To write logs to Amazon Cloudwatch
+		- To access to write item to DynamoDB table
+	- Use IAM Console to create a new role named "WildRydesLambda"
+		- Services -> IAM -> Roles -> Create New Role
+		- Role type : Lambda -> Next : permission
+		- (Select a role type automatically creates a trust policy)
+		- Choose :AWSLambdaBasicExecutionRole
+		- Role Name : WildRydesLambda
+		- Create Role
+		- On Roles page choose the just created role
+		- permission tab -> Add inline policy -> create a new inline policy
+		- Service : Find DynamoDB
+		- Actions : PutItem
+		- Resources : Specific option -> Add ARN -> Paste the ARN of the table -> Add
+		- Review Policy
+		- Enter DynamoDBWriteAccess for the policy name -> create policy
+
+3. Create a Lambda Function for handling requests :
+	- This section we will build the core function :
+	- Services -> Lambda -> Create Function -> Author from the scratch -> Name : RequestUnicorn
+	- Runtime : Node.js 6.10 -> chooing an existing role : WildRydesLambda -> Create Function
+	- Replace the index.js code with requestUnicorn.js code
+	- Save the function
+
+4. Validate the implementation :
+	- Lambda function -> Main edit screen -> Select test event -> Configure test event  
+	- Create new test event -> Event name : TestRequestEvent 
+	- Copy and paste the following test event:
+
+{
+    "path": "/ride",
+    "httpMethod": "POST",
+    "headers": {
+        "Accept": "*/*",
+        "Authorization": "eyJraWQiOiJLTzRVMWZs",
+        "content-type": "application/json; charset=UTF-8"
+    },
+    "queryStringParameters": null,
+    "pathParameters": null,
+    "requestContext": {
+        "authorizer": {
+            "claims": {
+                "cognito:username": "the_username"
+            }
+        }
+    },
+    "body": "{\"PickupLocation\":{\"Latitude\":47.6174755835663,\"Longitude\":-122.28837066650185}}"
+}
+
+	- Click create
+	- Main function edit screen -> Test -> TestRequestEvent 
+	- Top of the page -> Details -> Execution Results
+	- Verify the execution succeeded
+	- following result will look like below :
+
+{
+    "statusCode": 201,
+    "body": "{\"RideId\":\"SvLnijIAtg6inAFUBRT+Fg==\",\"Unicorn\":{\"Name\":\"Rocinante\",\"Color\":\"Yellow\",\"Gender\":\"Female\"},\"Eta\":\"30 seconds\"}",
+    "headers": {
+        "Access-Control-Allow-Origin": "*"
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
