@@ -70,7 +70,13 @@ CLI step-by-step :
 	- If the page show properly -> move to the next section "User Management". 
 
 
-	
+7. Summary
+	- Create a bucket
+	- Upload all the files
+	- Uncheck all blocks
+	- Give public permission
+	- Configure Web hosting
+	- Validate the work using base-url	
 
 
 
